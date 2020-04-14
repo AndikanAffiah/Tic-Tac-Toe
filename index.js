@@ -14,9 +14,9 @@ const startGame = () => {
     ];
     const gameState = {
         cells: [],
+        canUpdate: true,
         updateCell: function (cellToUpdate, player) {
-            console.log(cellToUpdate, player)
-            if(this.cells[cellToUpdate] < 1){
+            if(this.cells[cellToUpdate] < 1 && this.canUpdate){
                 this.cells[cellToUpdate] = player;
                 updateBoard(this.emitStateData());
                 setTimeout(()=>{
@@ -63,6 +63,7 @@ const startGame = () => {
     const checkWinner = (data) => {
         winGameArray.forEach((elem) => {
             if(data[elem[0]] == data[elem[1]] && data[elem[1]] == data[elem[2]] && (data[elem[2]] == 1 || data[elem[2]] == 2)){
+                gameState.canUpdate = false;
                 if(data[elem[0]] == 1){
                     alert('Player X has won!!!');
                 }else{
