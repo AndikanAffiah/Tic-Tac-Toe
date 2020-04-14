@@ -27,6 +27,12 @@ const startGame = () => {
         },
         emitStateData: function () {
             return this.cells;
+        },
+        resetGameData: function () {
+            this.cells = this.cells.map(x => x = 0);
+            updateBoard(this.emitStateData());
+            this.canUpdate = true;
+            currentPlayer = players[0];
         }
     };
     const generateGameStateCellData = () => {
@@ -72,5 +78,9 @@ const startGame = () => {
             }
         })
     }
+    const reset = document.getElementById('resetButton');
+    reset.addEventListener('click', ()=>{
+        gameState.resetGameData();
+    });
     generateGameStateCellData();
 }
