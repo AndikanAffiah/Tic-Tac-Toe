@@ -4,12 +4,6 @@ const startGame = () => {
         players: [1, 2],
         playerChoice: 1,
 
-        undoRedoArray: [
-            [], //undo array
-            [] //redo array
-        ],
-        timesUndone: 0,
-
         winGameArray: [
             [1, 2, 3],
             [1, 4, 7],
@@ -38,7 +32,6 @@ const startGame = () => {
         
         updateGame(choice, cell) {
             this.gameState.mutate(choice, cell);
-            this.undoRedoArray[0].push([choice, cell]);
             this.displayState();
             
             if (choice == this.players[0]){
@@ -76,29 +69,7 @@ const startGame = () => {
                 }
                 
             }
-        },
-        
-        undoRedo(action) {
-            if(action == "undo"){
-                
-                if (this.undoRedoArray[0].length > 1){
-                    let value = this.undoRedoArray[0].splice(this.undoRedoArray[0].length - 2, 2);
-                    this.gameState.replace(value[1][1]);
-                    
-                    this.undoRedoArray[1].push([...value[1]]);
-                    this.updateGame(...value[0]);
-                    
-                    this.timesUndone += 1;
-                }
-            }else if(action == "redo"){
-                if (this.undoRedoArray[1].length > 0){
-                    let value = this.undoRedoArray[1].splice(this.undoRedoArray[1].length - 1, 1);
-                    this.gameState.replace(value[0][1]);
-                    this.updateGame(...value[0], );
-                }
-            }
-        }
-        
+        }        
     }
     
     const cells = [];
@@ -108,19 +79,6 @@ const startGame = () => {
         
         cells[i].addEventListener('dblclick' || 'click', () => {
             ticTacToe.updateGame(ticTacToe.playerChoice, i);
-            if (ticTacToe.undoRedoArray[1] > 1 && ticTacToe.timesUndone > 0){
-                ticTacToe.undoRedoArray[1].splice(ticTacToe.undoRedoArray[1].length - ticTacToe.timesUndone, ticTacToe.timesUndone);
-            }
         });
-    }  
-    
-    const undoButton = document.getElementById("undo");
-    const redoButton = document.getElementById("redo");
-    
-    undoButton.addEventListener('click', () => {
-        ticTacToe.undoRedo("undo");
-    });
-    redoButton.addEventListener('click', () => {
-        ticTacToe.undoRedo("redo");
-    });
+    }
 }
