@@ -1,126 +1,86 @@
-const startGame = () => {
-    const ticTacToe = {
+const startGame = () => {  
+    const players = [1,2];
+    let currentPlayer = players[0];
 
-        players: [1, 2],
-        playerChoice: 1,
-
-        undoRedoArray: [
-            [], //undo array
-            [] //redo array
-        ],
-        timesUndone: 0,
-
-        winGameArray: [
-            [1, 2, 3],
-            [1, 4, 7],
-            [1, 5, 9],
-            [2, 5, 8],
-            [3, 5, 7],
-            [3, 6, 9],
-            [4, 5, 6],
-            [7, 8, 9]
-        ],
-        gameState: {
-            data: [0,0,0,0,0,0,0,0,0,0],
-            mutate(choice, cell) {
-                if (this.data[cell] == 0){
-                    if (choice == 1) {
-                        this.data[cell] = 1;
-                    } else {
-                        this.data[cell] = 2;
-                    }
-                }
-            },
-            replace(cell) {
-                this.data[cell] = 0;
+    const winGameArray = [
+        [1, 2, 3],
+        [1, 4, 7],
+        [1, 5, 9],
+        [2, 5, 8],
+        [3, 5, 7],
+        [3, 6, 9],
+        [4, 5, 6],
+        [7, 8, 9]
+    ];
+    const gameState = {
+        cells: [],
+        canUpdate: true,
+        updateCell: function (cellToUpdate, player) {
+            if(this.cells[cellToUpdate] < 1 && this.canUpdate){
+                this.cells[cellToUpdate] = player;
+                updateBoard(this.emitStateData());
+                setTimeout(()=>{
+                    checkWinner(this.emitStateData()); 
+                }, 400);
+                changePlayer();
             }
         },
-        
-        updateGame(choice, cell) {
-            this.gameState.mutate(choice, cell);
-            this.undoRedoArray[0].push([choice, cell]);
-            this.displayState();
-            
-            if (choice == this.players[0]){
-                this.playerChoice = this.players[1];
+        emitStateData: function () {
+            return this.cells;
+        },
+        resetGameData: function () {
+            this.cells = this.cells.map(x => x = 0);
+            updateBoard(this.emitStateData());
+            this.canUpdate = true;
+            currentPlayer = players[0];
+        }
+    };
+    const generateGameStateCellData = () => {
+        for (let i = 1; i <= 9; i++) {
+            gameState.cells[i] = 0; 
+        }
+    };
+    const display = document.getElementById('display');
+    display.addEventListener('click', (e) => {
+        if (e.target.id.length == 1) {
+            gameState.updateCell(Number(e.target.id), currentPlayer);
+        }
+    });
+    const updateBoard = (data) => {
+        for (let i = 1; i < data.length; i++) {
+            if(data[i] != 0){
+                if(data[i] == 1){
+                    document.getElementById(i).innerText = 'X';
+                }else if(data[i] == 2){
+                    document.getElementById(i).innerText = 'O'
+                }
             }else{
-                this.playerChoice = this.players[0];
-            }            
-            
-            setTimeout(() => {
-                this.checkWinner();
-            }, 400);
-        },
-        
-        displayState() {
-            for (let i = 1; i <= 9; i++) {
-                if(this.gameState.data[i] == 0){
-                    cells[i].innerHTML = "";
-                } else if (this.gameState.data[i] == 1){
-                    cells[i].innerHTML = "X";
-                } else {
-                    cells[i].innerHTML = "O";                    
-                }
-            }
-        },
-        
-        checkWinner() {
-            for (let i = 0; i < this.winGameArray.length; i++) {
-                
-                let a = this.gameState.data[this.winGameArray[i][0]];
-                let b = this.gameState.data[this.winGameArray[i][1]];
-                let c = this.gameState.data[this.winGameArray[i][2]];
-                
-                if(a == b && b == c && (c == 1 || c == 2)){
-                    alert("You have won");
-                }
-                
-            }
-        },
-        
-        undoRedo(action) {
-            if(action == "undo"){
-                
-                if (this.undoRedoArray[0].length > 1){
-                    let value = this.undoRedoArray[0].splice(this.undoRedoArray[0].length - 2, 2);
-                    this.gameState.replace(value[1][1]);
-                    
-                    this.undoRedoArray[1].push([...value[1]]);
-                    this.updateGame(...value[0]);
-                    
-                    this.timesUndone += 1;
-                }
-            }else if(action == "redo"){
-                if (this.undoRedoArray[1].length > 0){
-                    let value = this.undoRedoArray[1].splice(this.undoRedoArray[1].length - 1, 1);
-                    this.gameState.replace(value[0][1]);
-                    this.updateGame(...value[0], );
-                }
+                document.getElementById(i).innerText = '';
             }
         }
-        
+    };
+    const changePlayer = () => {
+        if(currentPlayer == players[0]){
+            currentPlayer = players[1];
+        }else{
+            currentPlayer = players[0];
+        }
     }
-    
-    const cells = [];
-    
-    for(let i = 1; i <= 9; i++){
-        cells[i] = document.getElementById(i);
-        
-        cells[i].addEventListener('dblclick' || 'click', () => {
-            ticTacToe.updateGame(ticTacToe.playerChoice, i);
-            if (ticTacToe.undoRedoArray[1] > 1 && ticTacToe.timesUndone > 0){
-                ticTacToe.undoRedoArray[1].splice(ticTacToe.undoRedoArray[1].length - ticTacToe.timesUndone, ticTacToe.timesUndone);
+    const checkWinner = (data) => {
+        winGameArray.forEach((elem) => {
+            if(data[elem[0]] == data[elem[1]] && data[elem[1]] == data[elem[2]] && (data[elem[2]] == 1 || data[elem[2]] == 2)){
+                gameState.canUpdate = false;
+                if(data[elem[0]] == 1){
+                    alert('Player X has won!!!');
+                }else{
+                    alert('Player O has won');
+                }
             }
-        });
-    }  
-    
-    const undoButton = document.getElementById("undo");
-    const redoButton = document.getElementById("redo");
-    
-    undoButton.addEventListener('click', () => {
-        ticTacToe.undoRedo("undo");
+        })
+    }
+    const reset = document.getElementById('resetButton');
+    reset.addEventListener('click', ()=>{
+        gameState.resetGameData();
     });
-    redoButton.addEventListener('click', () => {
-        ticTacToe.undoRedo("redo");
-    });
+    generateGameStateCellData();
 }
